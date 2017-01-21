@@ -1,0 +1,952 @@
+#+TITLE: Coq, Theorem Proving Assistant or More
+
+#+AUTHOR: Junyoung Clare Jang
+
+#+DATE: <2017-01-20 Fri>
+
+#+EPRESENT_FRAME_LEVEL: 1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+* Table Of Contents
+
+
+  - About Coq
+    - Curry-Howard Correspondence
+    - Coq and Theorem Proving
+  - How to Install Coq
+  - Basic Examples for Beginner
+    - Start with Modules
+    - Define Functions
+    - Define Simple Theorems
+    - More Proof Techniques
+  - Welcome to Inductive World
+    - Define Inductive Types
+    - Prove with Induction
+  - Computational Logic & Classical Logic
+    - Computational Logic
+    - Classical Logic
+    - Curry-Howard Correspondence Again
+
+* About Coq
+
+** Curry-Howard Correspondence
+** Coq and Theorem Proving
+
+* Curry-Howard Correspondence
+
+
+
+       [[./img/Curry.jpg]] VS [[file:./img/Howard.jpg]]
+
+* Curry-Howard Correspondence
+
+
+# |      <r10> | <l10>      |
+  |------------+------------|
+  |    Theorem | Proof      |
+  |------------+------------|
+  |        Set | Element    |
+  |       Type | Value      |
+  |------------+------------|
+
+
+  - Truth set = Theorem
+    Element of truth set = Proof
+
+     [[./img/Truth-set.jpg]]
+
+* Curry-Howard Correspondence
+
+
+# |                    <r> | <l>                      |
+  |------------------------+--------------------------|
+  |        Classical Logic | Type Theory              |
+  |------------------------+--------------------------|
+  |                   True | Unit type                |
+  |                  False | Bottom type              |
+  |       Or / Disjunction | Union type               |
+  |      And / Conjunction | Product type             |
+  |  If Then / Implication | Function type            |
+  | Existential Quantifier | Generalised Union type   |
+  |   Universal Quantifier | Generalised Product type |
+  |------------------------+--------------------------|
+
+* Coq and Theorem Proving
+
+** Coq
+
+  -  Theorem prover (or Theorem proving assistant)
+  -  You can prove theorems using Coq
+  -  For example,
+    -  Four color theorem, probably most famous example
+    -  CompCert C Verified Compiler
+    -  And many other mathematic theorems and programs
+
+** Theorem Proving in Coq
+
+  -  Find a value of specific type!
+  -  Using various automation functionalities and strictness
+
+* How to Install Coq
+
+
+  -  Go to
+    [[https://coq.inria.fr/download]]
+
+  -  You can find your own OS(Windows/Mac) at the bottom of that page like below
+    [[file:./img/coq-download.jpg]]
+
+* How to Install Coq
+
+
+  -  If you use linux, you can install Coq via your linux package managers,
+    -  On yum
+    -  On apt-get
+    -  On pacman
+    -  And others
+
+  -  You can also use OPAM(OCaml Package Manager) to install it from OCaml repo
+    -  Instruction
+      [[https://coq.inria.fr/opam/www/using.html]]
+    -  After Install OPAM,
+      #+BEGIN_SRC sh
+        opam repo add coq http://coq.inria.fr/opam/released
+        opam pin add coq `opam show --field=version coq`
+        opam install coq coqide
+      #+END_SRC
+
+  -  Or, if you want to use state-of-art Coq, you can build it from its OCaml source.
+    -  Instruction
+      [[https://coq.inria.fr/cocorico/Installation%20of%20Coq%20on%20Linux]]
+
+* Basic Examples for Beginner
+
+** Start with Modules
+** Define Functions
+** Define Simple Theorems
+** Prove Simple Theorems
+
+* Start with Modules
+
+
+  -  *Module* s are container of codes
+
+    #+BEGIN_SRC coq
+      Module coq_basic.
+
+        (* Module contents *)
+
+      End coq_basic.
+    #+END_SRC
+
+* Define Functions
+
+
+  -  *Definition* is for simple functions
+
+    #+BEGIN_SRC coq
+      Definition negb (b: bool): bool :=
+        match b with
+        | true => false
+        | false => true
+        end
+      .
+
+      Check negb.
+
+      Definition andb (b0 b1: bool): bool :=
+        match b0 with
+        | false => false
+        | true => b1
+        end
+      .
+
+      Check andb.
+    #+END_SRC
+
+* Define Functions
+
+
+  #+BEGIN_SRC coq
+    (* Fix this definition! *)
+    Definition orb (b0 b1: bool): bool := true.
+
+    Check orb.
+
+    Example orbTest0: orb true true = true.
+    Proof. reflexivity. Qed.
+    Example orbTest1: orb true false = true.
+    Proof. reflexivity. Qed.
+    Example orbTest2: orb false true = true.
+    Proof. reflexivity. Qed.
+    Example orbTest3: orb false false = false.
+    Proof. reflexivity. Qed.
+  #+END_SRC
+
+* Define Functions
+
+
+  - *Fixpoint* is for recursive functions
+
+    #+BEGIN_SRC coq
+      Fixpoint even (n: nat): bool :=
+        match n with
+        | 0 => true
+        | 1 => false
+        | S (S n') => even n'
+        end
+      .
+
+      Check even.
+    #+END_SRC
+
+* Define Functions
+
+
+  #+BEGIN_SRC coq
+    (* Fix this defintion! *)
+    Definition odd (n: nat): bool := true.
+
+    Check odd.
+
+    Example oddTest0: odd 0 = false.
+    Proof. reflexivity. Qed.
+    Example oddTest1: odd 2 = false.
+    Proof. reflexivity. Qed.
+    Example oddTest2: odd 7 = true.
+    Proof. reflexivity. Qed.
+    Example oddTest3: odd 23 = true.
+    Proof. reflexivity. Qed.
+  #+END_SRC
+
+* Define Functions
+
+
+  - *Type* is type for Type variables
+
+    #+BEGIN_SRC coq
+      Definition applyOnceX (X: Type) (f: X -> X) (x: X): X :=
+        f x
+      .
+
+      Check applyOnce.
+
+      Fixpoint applyNTimesX (X: Type) (n: nat) (f: X -> X) (x: X): X :=
+        match n with
+        | 0 => x
+        | S n' => applyNTimesX X n' f (f x)
+        end
+      .
+
+      Check applyNTimes
+    #+END_SRC
+
+* Define Functions
+
+
+  - We also can use implicit arguments.
+
+    #+BEGIN_SRC coq
+      Definition applyOnce {X: Type} (f: X -> X) (x: X): X :=
+        f x
+      .
+
+      Check applyOnce.
+      Check @applyOnce.
+
+      Fixpoint applyNTimes {X: Type} (n: nat) (f: X -> X) (x: X): X :=
+        match n with
+        | 0 => x
+        | S n' => applyNTimes n' f (f x)
+        end
+      .
+
+      Check applyNTimes.
+      Check @applyNTimes.
+    #+END_SRC
+
+* Define Simple Theorems
+
+
+  - In proof, we use tactics to make _a value of the type_.
+  - Tactics make value finding easier to understand.
+
+* Define Simple Theorems
+
+  
+  -  Using *simpl* and *reflexivity*.
+
+    #+BEGIN_SRC coq
+      Theorem silly0:
+        1 + 1 = 2.
+      Proof.
+        simpl.
+        reflexivity.
+      Qed.
+
+      Theorem silly1: forall (n: nat),
+        n = n.
+      Proof.
+        reflexivity.
+      Qed.
+    #+END_SRC
+
+* Define Simple Theorems
+
+
+  -  Using *intro* / *intros* and *rewrite*
+
+    #+BEGIN_SRC coq
+      Theorem plus_O_n: forall (n: nat),
+          0 + n = n.
+      Proof.
+        intro n.
+        reflexivity.
+      Qed.
+
+      (* How about plus_n_O ??? *)
+
+      Theorem plus_id_simple: forall (n m: nat),
+          n = m ->
+          n + n = m + m.
+      Proof.
+        intros n m.
+        intro H.
+        rewrite -> H.
+        reflexivity.
+      Qed.
+    #+END_SRC
+
+* Define Simple Theorems
+
+
+  #+BEGIN_SRC coq
+    Theorem plus_id_complex: forall (n m o: nat),
+        n = m ->
+        m = o ->
+        n + m = m + o.
+    Proof.
+    Admitted.
+  #+END_SRC
+
+* More Proof Techniques
+
+
+  -  *destruct* Divide a value into patterns
+    (with labels like -, +, *, --, ...)
+  
+    #+BEGIN_SRC coq
+      Theorem andb_b_false: forall b,
+          andb b false = false.
+      Proof.
+        intro b.
+        destruct b.
+        - reflexivity.
+        - reflexivity.
+      Qed.
+    #+END_SRC
+
+* More Proof Techniques
+
+
+  #+BEGIN_SRC coq
+    Theorem andb_orb_eq: forall b0 b1,
+        andb b0 b1 = orb b0 b1 ->
+        b0 = b1.
+    Proof.
+    Admitted.
+  #+END_SRC
+
+* More Proof Techniques
+
+
+  -  By using *intros [case1 | case2 | ...]*,
+    you can apply *intros* and *destruct* at same time.
+
+    #+BEGIN_SRC coq
+      Theorem beq_nat_plus1_O: forall (n: nat),
+          beq_nat (n + 1) 0 = false.
+      Proof.
+        intros [|n].
+        - reflexivity.
+        - reflexivity.
+      Qed.    
+    #+END_SRC
+* Welcome to Inductive World
+
+** Define Inductive Types
+** Prove with Induction
+
+* Define Inductive Types
+  
+  
+  - Can natural number, *nat* be defined by inductive way?
+
+    #+BEGIN_SRC coq
+      Inductive nat :=
+      | O: nat
+      | S: nat -> nat
+      .
+    #+END_SRC
+
+* Define Inductive Types
+  
+  
+  - How about boolean, *bool*?
+
+    #+BEGIN_SRC coq
+      Inductive bool :=
+      | true: bool
+      | false: bool
+      .
+    #+END_SRC
+
+* Define Inductive Types
+  
+  
+  - And list?
+
+    #+BEGIN_SRC coq
+      Inductive list (X: Type) :=
+      | nil: list X
+      | cons: X -> list X -> list X
+      .
+
+      Check nil.
+      Check cons bool false (cons bool true (nil bool)).
+    #+END_SRC
+
+* Define Inductive Types
+
+
+  - Or more elegant list with *Arguments* statement to make implicit arguments.
+
+    #+BEGIN_SRC coq
+      Inductive list (X: Type) :=
+      | nil: list X
+      | cons: X -> list X -> list X
+      .
+
+      Arguments nil {X}.
+      Arguments cons {X} _ _.
+
+      Check nil.
+      Check cons false (cons true nil).
+    #+END_SRC
+
+* Define Inductive Types
+
+
+  - Inductively defined types can use *inversion* tactics.
+  - *inversion* checks constructor of value,
+    and extract conditions if possible.
+
+    #+BEGIN_SRC coq
+      Theorem zero_is_one_than: forall P,
+          0 = 1 -> P.
+      Proof. intros P contra. inversion contra. Qed.
+
+      Theorem only_one_head: forall X (l: list X) h0 h1 t0 t1,
+          l = cons h0 t0 ->
+          l = cons h1 t1 ->
+          h0 = h1.
+      Proof.
+        intros X l h0 h1 t0 t1 H0 H1.
+        destruct l.
+        - inversion H0.
+        - inversion H0. inversion H1. rewrite <- H2, <-H4. reflexivity.
+      Qed.
+
+    #+END_SRC
+
+* Prove with Induction
+
+  - By *induction* tactic,
+
+    #+BEGIN_SRC coq
+      Theorem plus_n_O: forall n,
+          n + 0 = n.
+      Proof.
+        intros n.
+        induction n.
+        - reflexivity.
+        - simpl. rewrite -> IHn. reflexivity.
+      Qed.
+
+      Theorem plus_Sn_m_n_Sm: forall n m,
+          S n + m = n + S m.
+      Proof.
+        intros n m.
+        induction n.
+        - reflexivity.
+        - simpl. rewrite <- IHn. reflexivity.
+      Qed.
+    #+END_SRC
+
+* Prove with Induction
+
+
+  #+BEGIN_SRC coq
+    Theorem plus_comm: forall n m,
+        n + m = m + n.
+    Proof.
+    Admitted.
+  #+END_SRC
+
+* Prove with Induction
+
+
+  - We also can apply induction to list.
+
+    #+BEGIN_SRC coq
+      Fixpoint length {X: Type} (l: list X): nat :=
+        match l with
+        | nil => 0
+        | cons h t => S (length t)
+        end
+      .
+
+      Fixpoint app {X: Type} (l0 l1: list X): list X :=
+        match l0 with
+        | nil => l1
+        | cons h0 t0 => cons h0 (app t0 l1)
+        end
+      .
+    #+END_SRC
+
+* Prove with Induction
+
+
+  - We also can apply induction to list.
+
+    #+BEGIN_SRC coq
+      Theorem app_length: forall X (l0 l1: list X),
+          length l0 + length l1 = length (app l0 l1).
+      Proof.
+        intros X l0 l1.
+        induction l0.
+        - reflexivity.
+        - simpl. rewrite IHl0. reflexivity.
+      Qed.
+    #+END_SRC
+
+* Prove with Induction
+
+
+  - Actually, any _inductive types_ can be destructed by *induction*.
+  - This includes natural numbers, list, and many other user-defined types.
+
+* Prove with Induction
+
+
+  #+BEGIN_SRC coq
+    Fixpoint snoc {X: Type} (x: X) (l: list X): list X :=
+      (* This must do cons in reverse direction *)
+      l
+    .
+
+    Fixpoint reverse {X: Type} (l: list X): list X :=
+      (* This must make reversed list of l *)
+      l
+    .
+
+    Lemma snoc_length: forall X (x: X) (l: list X),
+        length (snoc x l) = S (length l).
+    Proof.
+    Admitted.
+
+    Theorem reverse_length: forall X (l: list X),
+        length l = length (reverse l).
+    Proof.
+    Admitted.  
+  #+END_SRC
+
+* Computational Logic & Classical Logic
+
+** Computational Logic
+** Classical Logic
+** Curry-Howard Correspondence Again
+
+* Computational Logic
+
+
+  - *Prop* is the type of Propositions.
+
+    #+BEGIN_SRC coq
+      Check 1 = 1.
+      Check forall n m: nat, n + m = m + n.
+      Check 1 = 2.
+      Check forall n: nat, n = 2.
+
+      Locate "=".
+      Check eq.
+      Check @eq.
+      Print eq.
+    #+END_SRC
+
+* Computational Logic
+
+
+  - *and*, i.e. conjunction can be defined with following expression.
+
+    #+BEGIN_SRC coq
+      Inductive and (A B: Prop): Prop :=
+      | conj: A /\ B
+
+      where "A /\ B" := (and A B): type_scope
+      .
+
+      Locate "/\".
+      Print and.
+    #+END_SRC
+
+* Computational Logic
+
+
+  - *or*, i.e. disjunction can be defined with following expression.
+
+    #+BEGIN_SRC coq
+      Inductive or (A B: Prop): Prop :=
+      | or_introl: A -> A \/ B
+      | or_intror: B -> A \/ B
+
+      where "A \/ B" := (or A B): type_scope
+      .
+
+      Locate "\/".
+      Print or.
+    #+END_SRC
+
+* Computational Logic
+
+
+  - *not*, i.e. negation can be defined with following expression.
+
+    #+BEGIN_SRC coq
+      Definition not (P: Prop) :=
+        P -> False
+      .
+      Notation "~ P" := (not P) : type_scope.
+
+      Locate "~".
+      Print not.
+    #+END_SRC
+
+* Computational Logic
+
+
+  - Then what is the *False*?
+
+    #+BEGIN_SRC coq
+      Inductive False: Prop :=
+      .
+
+      Print False.
+    #+END_SRC
+
+* Computational Logic
+
+
+  - Finally, trivial *True*.
+
+    #+BEGIN_SRC coq
+      Inductive True :=
+      | I: True
+      .
+
+      Print True.
+    #+END_SRC
+
+* Computational Logic
+
+
+  - *iff*, i.e. if and only if is,
+
+    #+BEGIN_SRC coq
+      Definition iff (P Q: Prop): Prop :=
+        (P -> Q) /\ (Q -> P)
+      .
+      Notation "P <-> Q" := (iff P Q): type_scope.
+
+      Locate "<->".
+      Print iff.
+    #+END_SRC
+
+* Computational Logic
+
+
+  - *ex*, i.e. existential quantifier
+
+    #+BEGIN_SRC coq
+      Inductive ex (A: Type) (P: A -> Prop): Prop :=
+      | ex_intro: forall x: A, P x -> ex A P.
+      Notation "'exists' x .. y , p" := (ex (fun x => .. (ex (fun y => p)) ..))
+                                          (at level 200, x binder, right associativity,
+                                           format "'[' 'exists' '/ ' x .. y , '/ ' p ']'")
+                                        : type_scope.
+
+      Locate "exists".
+      Print ex.
+    #+END_SRC
+
+* Computational Logic
+
+
+  - Simple propositions.
+  - *apply* is a tactic for applying preexisting proof to current one.
+
+    #+BEGIN_SRC coq
+      Theorem truth:
+        True.
+      Proof.
+        apply I.
+      Qed.
+
+      Theorem ex_falso_quodlibet: forall P,
+          False -> P.
+      Proof.
+        intros P contra.
+        destruct contra.
+      Qed.
+    #+END_SRC
+
+* Computational Logic
+
+
+  - Commutative properties of *and* and *or*.
+  - *split* is just a alias of *apply conj*
+    and *right* / *left* are just aliases of *apply or_intror* / *apply or_introl*.
+
+    #+BEGIN_SRC coq
+      Theorem and_comm: forall P Q,
+          P /\ Q -> Q /\ P.
+      Proof.
+        intros P Q [HP HQ]. split.
+        - apply HQ.
+        - apply HP.
+      Qed.
+
+      Theorem or_comm: forall P Q,
+          P \/ Q -> Q \/ P.
+      Proof.
+        intros P Q [HP | HQ].
+        - right. apply HP.
+        - left. apply HQ.
+      Qed.
+    #+END_SRC
+
+* Computational Logic
+
+
+  - Reflective property of *iff*.
+
+    #+BEGIN_SRC coq
+      Theorem iff_refl: forall P,
+          P <-> P.
+      Proof.
+        intros P.
+        split.
+        - intro H. apply H.
+        - intro H. apply H.
+      Qed.
+    #+END_SRC
+
+* Computational Logic
+
+
+  - Symmetric property of *iff*.
+
+    #+BEGIN_SRC coq
+      Theorem iff_sym: forall P Q,
+          (P <-> Q) -> (Q <-> P).
+      Proof.
+        intros P Q [HPQ HQP]. split.
+        - apply HQP.
+        - apply HPQ.
+      Qed.
+    #+END_SRC
+
+* Computational Logic
+
+
+  - Transitive property of *iff*
+
+    #+BEGIN_SRC coq
+      Theorem iff_trans: forall P Q R,
+          (P <-> Q) -> (Q <-> R) -> (P <-> R).
+      Proof.
+        intros P Q R [HPQ HQP] [HQR HRQ]. split.
+        - intros HP. apply HQR. apply HPQ. apply HP.
+        - intros HR. apply HQP. apply HRQ. apply HR.
+      Qed.
+    #+END_SRC
+
+* Computational Logic
+
+
+  #+BEGIN_SRC coq
+    Theorem or_distributes_over_and: forall P Q R,
+        P \/ (Q /\ R) <-> (P \/ Q) /\ (P \/ R).
+    Proof.
+    Admitted.
+  #+END_SRC
+
+* Computational Logic
+
+
+  - Some trivial (but important) example for existential quantifier.
+  - *... in ...* can use with many tactics to apply it to (specific) hypothesis.
+
+    #+BEGIN_SRC coq
+      Theorem forall_then_not_exists_not: forall X (P: X -> Prop),
+          (forall x, P x) -> ~ (exists x, ~ P x).
+      Proof.
+        intros X P HA HEnot.
+        inversion HEnot.
+        apply H. apply HA.
+      Qed.
+
+      Theorem forall_not_then_not_exists: forall X (P: X -> Prop),
+          (forall x, ~ P x) -> ~ (exists x, P x).
+      Proof.
+        intros X P HAnot HE.
+        inversion HE. apply HAnot in H. apply H.
+      Qed.
+
+      (* How about opposite implication? *)
+    #+END_SRC
+
+* Computational Logic
+
+
+  #+BEGIN_SRC coq
+    Theorem exists_then_not_forall_not: forall X (P: X -> Prop),
+      (exists x, P x) -> ~ (forall x, ~ P x).
+    Proof.
+    Admitted.
+
+    Theorem exists_not_then_not_forall: forall X (P: X -> Prop),
+        (exists x, ~ P x) -> ~ (forall x, P x).
+    Proof.
+    Admitted.
+      (* How about opposite implication? *)
+  #+END_SRC
+
+* Classical Logic
+
+
+  - Logic in Coq, _Calculus of Introduction_ differs from Classical (Set Theory) Logic.
+  - For example,
+    1. Coq can't comparing functions.
+    2. Coq can't exclude middle, i.e. we can't use related classical propositions.
+
+* Classical Logic
+
+
+  - To compare functions, we need to use so called *Axiom*,
+    to introduce *functional_extensionality*.
+
+    #+BEGIN_SRC coq
+      Axiom functional_extensionality: forall {X Y: Type} {f g: X -> Y},
+          (forall x, f x = g x) -> f = g.
+
+      Example plus_comm_lambda: plus = fun n m => m + n.
+      Proof. apply functional_extensionality. intros n.
+             apply functional_extensionality. intros m.
+             apply plus_comm. Qed.
+    #+END_SRC
+
+* Classical Logic
+
+
+  - Likewise, to use classical propositions like excluded middle, use *Axiom*
+
+    #+BEGIN_SRC coq
+      Axiom excluded_middle: forall P, P \/ ~P.
+    #+END_SRC
+
+* Classical Logic
+
+
+  - Or for restricted way, use *Definition* and add it to premise.
+  - *assert* is a tactic that add inline lemma using current environment.
+  - *exists x* is just a synonym of *apply (ex_intro x)*.
+
+    #+BEGIN_SRC coq
+      Definition excluded_middle: Prop := forall P, P \/ ~P.
+
+      Theorem not_exists_not_then_forall: forall X (P: X -> Prop),
+        excluded_middle ->
+          ~ (exists x, ~ P x) -> (forall x, P x).
+      Proof.
+        intros X P HExMid HnotEnot x.
+        assert (P x \/ ~ P x).
+        - apply HExMid.
+        - destruct H as [HP | HnotP].
+          + apply HP.
+          + exfalso. apply HnotEnot.
+            exists x. apply HnotP.
+      Qed.
+    #+END_SRC
+
+* Classical Logic
+
+
+  #+BEGIN_SRC coq
+    Definition peirce := forall P Q: Prop, ((P->Q)->P)->P.
+
+    Definition double_negation_elimination := forall P:Prop, ~~P -> P.
+
+    Definition de_morgan_not_and_not := forall P Q:Prop, ~(~P /\ ~Q) -> P\/Q.
+
+    Definition implies_to_or := forall P Q:Prop, (P->Q) -> (~P\/Q).
+
+    (* Prove that these classical propositions are equivalent.
+     ,* In the other world, show that
+     ,* for any two of these propositions, biconditional(iff) is satisfied. *)
+  #+END_SRC
+
+* Curry-Howard Correspondence Again
+
+
+  - Curry-Howard does not claim that,
+    - every true propositions of set theory or classical logic
+      is true on type theory
+    - every provable propositions of set theory or classical logic
+      is provable on type theory
+  - Curry-Howard does claim that,
+    - When you use corresponding axioms,
+      every true propositions of set theory or classical logic
+      is true on type theory
+    - You can find corresponding proposition of type theory
+      for each of propositions in set theory.

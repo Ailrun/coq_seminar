@@ -332,7 +332,7 @@ Module coq_logic_definition.
   Print eq.
 
   Inductive and (A B: Prop): Prop :=
-  | conj: A /\ B
+  | conj: A -> B -> A /\ B
 
   where "A /\ B" := (and A B): type_scope
   .

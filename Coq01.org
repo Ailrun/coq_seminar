@@ -80,8 +80,8 @@
   |------------+------------|
 
 
-  - Truth set = Theorem
-    Element of truth set = Proof
+  - Truth set ~ Theorem
+  - Element of truth set ~ Proof
 
      [[./img/Truth-set.jpg]]
 

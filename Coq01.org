@@ -621,7 +621,7 @@
 
     #+BEGIN_SRC coq
       Inductive and (A B: Prop): Prop :=
-      | conj: A /\ B
+      | conj: A -> B -> A /\ B
 
       where "A /\ B" := (and A B): type_scope
       .
